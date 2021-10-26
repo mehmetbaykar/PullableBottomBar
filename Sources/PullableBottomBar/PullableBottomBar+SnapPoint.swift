@@ -19,18 +19,6 @@ extension PullableBottomBar {
             }
         }
     }
-
-    func nearestPoint(of pointY: CGFloat) -> CGFloat {
-        var result: (y: CGFloat, distance: CGFloat) = (0, .greatestFiniteMagnitude)
-        for snapPoint in snapPoints {
-            let y = snapPoint.y
-            let distance = abs(y - pointY)
-            if result.distance > distance {
-                result = (y: y, distance: distance)
-            }
-        }
-        return result.y
-    }
 }
 
 extension PullableBottomBar.SnapPoint: Comparable {

@@ -109,8 +109,13 @@ open class PullableBottomBar: UIViewController {
         switch self.position{
         case .shrink: self.expand()
         case .expand: self.shrink()
-        default:break
-    
+        case .custom(y: let y):
+          let closest = self.findClosest([pullableMinY,pullableMaxY], y)
+            if closest == pullableMaxY{
+                self.shrink()
+            }else{
+                self.expand()
+            }
         }
     }
     
@@ -159,13 +164,25 @@ extension PullableBottomBar{
     }
     
     open func expand(){
-        scroll(toY: pullableMinY, duration: 0.75)
-        self.position = .expand
+        self.contentViewController?.viewWillAppear(false)
+        
+        scroll(toY: pullableMinY, duration: 0.75) { finished in
+            if finished{
+                self.position = .expand
+                self.contentViewController?.viewDidAppear(false)
+            }
+        }
     }
     
     open func shrink(){
-        scroll(toY: pullableMaxY, duration: 0.75)
-        self.position = .shrink
+        self.contentViewController?.viewWillDisappear(false)
+        
+        scroll(toY: pullableMaxY, duration: 0.75) { finished in
+            if finished{
+                self.position = .shrink
+                self.contentViewController?.viewDidDisappear(false)
+            }
+        }
     }
     
     @objc private func panGesture(_ recognizer: UIPanGestureRecognizer) {
@@ -181,10 +198,12 @@ extension PullableBottomBar{
         
         let velocity = recognizer.velocity(in: view)
         
-        if velocity.y > 1500 {
+        if velocity.y > 1500,
+           self.position == .expand{
             self.shrink()
             return
-        }else if velocity.y < -1500 {
+        }else if velocity.y < -1500,
+                 self.position == .shrink{
             self.expand()
             return
         }
@@ -197,10 +216,33 @@ extension PullableBottomBar{
         if recognizer.state == .ended,
            !snapPoints.isEmpty {
             
-            let targetY = nearestPoint(of: y)
-            let distance = abs(y - targetY)
-            let duration = max(min(distance / velocity.y, distance / (UIScreen.main.bounds.height / 3)), 0.35)
-            scroll(toY: targetY, duration: Double(duration))
+            let targetY = findClosest(self.snapPoints.map{$0.y}, y)
+            
+            if targetY == pullableMinY{
+                self.expand()
+            }else if targetY == pullableMaxY{
+                self.shrink()
+            }else{
+                let distance = abs(y - targetY)
+                let duration = max(min(distance / velocity.y, distance / (UIScreen.main.bounds.height / 3.5)), 0.35)
+                scroll(toY: targetY, duration: Double(duration))
+                self.position = .custom(y: targetY)
+            }
         }
     }
+    
+    
+    private func findClosest(_ values: [CGFloat], _ givenValue: CGFloat) -> CGFloat {
+        var result: (nearest: CGFloat, distance: CGFloat) = (0, .greatestFiniteMagnitude)
+        
+        for point in values.sorted(){
+            let distance = abs(point - givenValue)
+            if result.distance > distance {
+                result = (nearest: point, distance: distance)
+            }
+        }
+        return result.nearest
+    }
 }
+
+
