@@ -1,6 +1,7 @@
-import Foundation
+import UIKit
 
-extension PullabBottomBar {
+extension PullableBottomBar {
+    
     public enum SnapPoint {
         case min
         case max
@@ -9,11 +10,10 @@ extension PullabBottomBar {
         var y: CGFloat {
             switch self {
             case .min:
-                return UIApplication.shared.keyWindow?.safeAreaInsets.top ?? 0
+                return UIApplication.shared.safeAreaTop
             case .max:
-                return UIScreen.main.bounds.height - {
-                    UIApplication.shared.keyWindow?.safeAreaInsets.bottom ?? 0
-                }()
+                return UIScreen.main.bounds.height -
+                    UIApplication.shared.safeAreaBottom - 50 // in order to swipe properly
             case .custom(let y):
                 return y
             }
@@ -33,8 +33,8 @@ extension PullabBottomBar {
     }
 }
 
-extension PullabBottomBar.SnapPoint: Comparable {
-    public static func == (lhs: PullabBottomBar.SnapPoint, rhs: PullabBottomBar.SnapPoint) -> Bool {
+extension PullableBottomBar.SnapPoint: Comparable {
+    public static func == (lhs: PullableBottomBar.SnapPoint, rhs: PullableBottomBar.SnapPoint) -> Bool {
         switch (lhs, rhs) {
         case (.min, .min): return true
         case (.max, .max): return true
@@ -43,7 +43,7 @@ extension PullabBottomBar.SnapPoint: Comparable {
         }
     }
 
-    public static func < (lhs: PullabBottomBar.SnapPoint, rhs: PullabBottomBar.SnapPoint) -> Bool {
+    public static func < (lhs: PullableBottomBar.SnapPoint, rhs: PullableBottomBar.SnapPoint) -> Bool {
         switch (lhs, rhs) {
         case (.min, _): return true
         case (.max, _): return false

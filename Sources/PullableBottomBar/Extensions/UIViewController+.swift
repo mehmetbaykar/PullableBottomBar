@@ -5,6 +5,7 @@ extension UIViewController {
         guard let targetView = view ?? viewController.view else { return }
         addChild(viewController)
         self.view.addSubview(targetView)
+        self.view.bringSubviewToFront(targetView)
         viewController.didMove(toParent: self)
     }
 }
