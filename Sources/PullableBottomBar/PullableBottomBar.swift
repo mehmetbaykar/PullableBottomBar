@@ -26,6 +26,9 @@ open class PullableBottomBar: UIViewController {
     private var parentView: UIView?
     private weak var contentScrollView: UIScrollView?
     
+    private var canViewAppear = true
+    private var canViewDisappear = true
+    
     deinit{
         self.parentView = nil
         self.contentScrollView = nil
@@ -158,29 +161,37 @@ extension PullableBottomBar{
     open func scroll(toY y: CGFloat,
                      duration: Double = 0.75,
                      completion: ((Bool) -> Void)? = nil) {
-        UIView.animate(withDuration: duration, delay: 0.0, usingSpringWithDamping: 0.75, initialSpringVelocity: 0, options: [.allowUserInteraction], animations: {
+        UIView.animate(withDuration: duration, delay: 0.0, usingSpringWithDamping: 0.75, initialSpringVelocity: 0, options: [.layoutSubviews], animations: {
             self.view.frame.origin.y = y
         }, completion: completion)
     }
     
     open func expand(){
-        self.contentViewController?.viewWillAppear(false)
-        
         scroll(toY: pullableMinY, duration: 0.75) { finished in
             if finished{
                 self.position = .expand
-                self.contentViewController?.viewDidAppear(false)
+                if self.canViewAppear{
+                    self.contentViewController?.viewWillAppear(false)
+                    self.contentViewController?.viewDidAppear(false)
+                    self.canViewAppear = false
+                    self.canViewDisappear = true
+                }
+              
             }
         }
     }
     
     open func shrink(){
-        self.contentViewController?.viewWillDisappear(false)
-        
         scroll(toY: pullableMaxY, duration: 0.75) { finished in
             if finished{
                 self.position = .shrink
-                self.contentViewController?.viewDidDisappear(false)
+                if self.canViewDisappear{
+                    self.contentViewController?.viewWillDisappear(false)
+                    self.contentViewController?.viewDidDisappear(false)
+                    self.canViewDisappear = false
+                    self.canViewAppear = true
+                }
+                
             }
         }
     }
