@@ -3,15 +3,15 @@ import UIKit
 extension PullableBottomBar {
     public enum TopBarStyle {
         case `default`
-        case custom(UIView)
+        case custom(AnimatableHeaderView)
     }
 }
 
 extension PullableBottomBar.TopBarStyle {
-    public var view: UIView {
+    public var view: AnimatableHeaderView {
         switch self {
         case .default:
-            let view = UIView(frame: .init(x: 0, y: 5, width: UIScreen.main
+            let view = AnimatableHeaderView(frame: .init(x: 0, y: 5, width: UIScreen.main
                                             .bounds.width, height: 50))
             view.backgroundColor = .white
             view.layer.cornerRadius = 5

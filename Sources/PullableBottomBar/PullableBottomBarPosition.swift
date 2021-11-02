@@ -1,6 +1,6 @@
 import UIKit
 
-public enum PullableBottomBarStatus:Equatable{
+public enum PullableBottomBarPosition:Equatable{
     case expand
     case custom(y:CGFloat)
     case shrink

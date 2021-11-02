@@ -10,6 +10,9 @@ open class PullableBottomBar: UIViewController {
         didSet { snapPoints.sort() }
     }
     
+    public var onShrinked: (()-> Void)? = nil
+    public var onExpanded: (()-> Void)? = nil
+    
     private var pullableMinY: CGFloat {
         return snapPoints.first?.y ?? SnapPoint.min.y
     }
@@ -21,7 +24,7 @@ open class PullableBottomBar: UIViewController {
     private let topBarStyle: TopBarStyle
     private let contentViewController: UIViewController?
     
-    private var position = PullableBottomBarStatus.shrink
+    private var position = PullableBottomBarPosition.shrink
     
     private var parentView: UIView?
     private weak var contentScrollView: UIScrollView?
@@ -34,9 +37,10 @@ open class PullableBottomBar: UIViewController {
         self.contentScrollView = nil
         print("\(Self.description()) has been deinited")
     }
+    
     public init(content: UIViewController,
                 topBarStyle: TopBarStyle = .default,
-                position:PullableBottomBarStatus = .shrink) {
+                position:PullableBottomBarPosition = .shrink) {
         self.contentViewController = content
         self.topBarStyle = topBarStyle
         self.position = position
@@ -56,7 +60,7 @@ open class PullableBottomBar: UIViewController {
     
     private func setupViews() {
         setupBackgroundView()
-        setupTapBar()
+        setupTopBar()
         setupTopBarTapGesture()
         setupContainerView()
     }
@@ -69,13 +73,22 @@ open class PullableBottomBar: UIViewController {
     }
     
     
-    private func setupTapBar(){
+    private func setupTopBar(){
         let topBar = topBarStyle.view
         view.addSubview(topBar)
         topBar.center.x = view.center.x
-        topBar.autoresizingMask = [.flexibleLeftMargin, .flexibleRightMargin,.flexibleWidth]
         topBar.isMultipleTouchEnabled = false
+        topBar.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            topBar.topAnchor.constraint(equalTo: view.topAnchor),
+            topBar.leftAnchor.constraint(equalTo: view.leftAnchor),
+            topBar.rightAnchor.constraint(equalTo: view.rightAnchor)
+        ])
+        
+        topBar.heightAnchor.constraint(equalToConstant: topBar.frame.height).isActive = true
     }
+
     
     private func setupContainerView(){
         if let content = contentViewController {
@@ -85,18 +98,13 @@ open class PullableBottomBar: UIViewController {
             NSLayoutConstraint.activate([
                 content.view.topAnchor.constraint(equalTo: self.topBarStyle.view.bottomAnchor),
                 content.view.leftAnchor.constraint(equalTo: view.leftAnchor),
-                content.view.rightAnchor.constraint(equalTo: view.rightAnchor)
+                content.view.rightAnchor.constraint(equalTo: view.rightAnchor),
+                content.view.bottomAnchor.constraint(equalTo: view.bottomAnchor)
             ])
-            
-            if #available(iOS 11.0, *) {
-                content.view.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor).isActive = true
-            } else {
-                content.view.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
-            }
         }
         self.view.bringSubviewToFront(topBarStyle.view)
-        
     }
+    
     private func setupTopBarTapGesture(){
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.didTopBarTapped))
         self.topBarStyle.view.addGestureRecognizer(tapGesture)
@@ -167,6 +175,7 @@ extension PullableBottomBar{
     }
     
     open func expand(){
+        self.onExpanded?()
         scroll(toY: pullableMinY, duration: 0.75) { finished in
             if finished{
                 self.position = .expand
@@ -175,13 +184,14 @@ extension PullableBottomBar{
                     self.contentViewController?.viewDidAppear(false)
                     self.canViewAppear = false
                     self.canViewDisappear = true
+                    self.topBarStyle.view.updateHeaderWith(.expand)
                 }
-              
             }
         }
     }
     
     open func shrink(){
+        self.onShrinked?()
         scroll(toY: pullableMaxY, duration: 0.75) { finished in
             if finished{
                 self.position = .shrink
@@ -190,8 +200,8 @@ extension PullableBottomBar{
                     self.contentViewController?.viewDidDisappear(false)
                     self.canViewDisappear = false
                     self.canViewAppear = true
+                    self.topBarStyle.view.updateHeaderWith(.shrink)
                 }
-                
             }
         }
     }
