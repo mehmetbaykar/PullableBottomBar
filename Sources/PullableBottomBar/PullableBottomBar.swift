@@ -134,7 +134,7 @@ open class PullableBottomBar: UIViewController {
         super.viewDidLayoutSubviews()
         guard let view = parentView else { return }
         self.view.frame.size.height = view.frame.height - pullableMinY
-        if roundTopBar{ topBarStyle.view.roundCorners([.topLeft,.topRight], radius: 20) }
+        if roundTopBar{ topBarStyle.view.roundCorners([.topLeft,.topRight], radius: 5) }
         
     }
     
@@ -148,11 +148,11 @@ open class PullableBottomBar: UIViewController {
     open func show(on viewController: UIViewController,
                    view: UIView? = nil) {
         parentView = view ?? viewController.view
-        viewController.addContainerView(self, view: view)
         self.view.autoresizingMask = [.flexibleWidth,
                                       .flexibleTopMargin,
                                       .flexibleHeight,
                                       .flexibleBottomMargin]
+        viewController.addContainerView(self, view: view)
     }
     
     open func scrollViewDidScroll(_ scrollView: UIScrollView) {
