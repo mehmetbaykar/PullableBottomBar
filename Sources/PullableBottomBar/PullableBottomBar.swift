@@ -134,7 +134,7 @@ open class PullableBottomBar: UIViewController {
         super.viewDidLayoutSubviews()
         guard let view = parentView else { return }
         self.view.frame.size.height = view.frame.height - pullableMinY
-        if roundTopBar{ topBarStyle.view.roundCorners([.topLeft,.topRight], radius: 5) }
+        if roundTopBar{ topBarStyle.view.roundCorners([.topLeft,.topRight], radius: UIDevice.current.userInterfaceIdiom == .pad ? 20 : 15) }
         
     }
     
