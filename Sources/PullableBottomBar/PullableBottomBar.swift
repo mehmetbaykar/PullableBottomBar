@@ -40,7 +40,7 @@ open class PullableBottomBar: UIViewController {
     
     public init(content: UIViewController,
                 topBarStyle: TopBarStyle = .default,
-                position:PullableBottomBarPosition = .shrink) {
+                position:PullableBottomBarPosition = .expand) {
         self.contentViewController = content
         self.topBarStyle = topBarStyle
         self.position = position

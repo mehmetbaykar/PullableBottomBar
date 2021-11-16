@@ -12,8 +12,7 @@ extension PullableBottomBar {
             case .min:
                 return UIApplication.shared.safeAreaTop
             case .max:
-                return UIScreen.main.bounds.height -
-                    UIApplication.shared.safeAreaBottom - 50 // in order to swipe properly
+                return UIScreen.main.bounds.height
             case .custom(let y):
                 return y
             }
